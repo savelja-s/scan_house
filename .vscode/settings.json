@@ -1,0 +1,17 @@
+{
+    "python.analysis.indexing": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.useLibraryCodeForTypes": true,
+    "python.defaultInterpreterPath": "~/anaconda3/envs/lidar/bin/python",
+    "explorer.confirmDragAndDrop": false,
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "editor.formatOnType": true,
+        "editor.wordBasedSuggestions": "off",
+    },
+    "explorer.confirmDelete": false,
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "grunt.autoDetect": "on"
+}

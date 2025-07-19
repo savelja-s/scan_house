@@ -1,0 +1,9 @@
+services:
+  lidar:
+    build: .
+    container_name: lidar_env
+    volumes:
+      - ./.:/app
+    working_dir: /app
+    tty: true
+    command: tail -f /dev/null
