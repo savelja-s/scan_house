@@ -1,6 +1,6 @@
 from lidar_processor.cluster_extractor import ClusterExtractor
 from lidar_processor.cluster_processor.boundary_builder import BoundaryBuilder
-from lidar_processor.cluster_processor.cluster_processor import ClusterProcessor
+from lidar_processor.cluster_processor.processor import ClusterProcessor
 from lidar_processor.cluster_processor.height_calculator import HeightCalculator
 from lidar_processor.geo_json_exporter import GeoJSONExporter
 
