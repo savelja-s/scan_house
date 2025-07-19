@@ -1,0 +1,16 @@
+name: lidar_project
+channels:
+  - sirokujira
+  - jithinpr2
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pdal
+  - python-pdal
+  - python-pcl
+  - gtk3
+  - shapely
+  - tqdm
+  - ipython
+  - jupyter

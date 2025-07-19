@@ -1,51 +1,52 @@
 import os
-import geojson
+import json
+import glob
+import gc
+import resource
+import faulthandler
 from tqdm import tqdm
-from functools import partial
 from multiprocessing import Pool, cpu_count
 
-from utils import get_las_bounds, split_area_into_tiles
-from processing import process_tile_worker
+from processing import process_tile_file  # new helper that reads an entire tile LAS
 
-# --- КОНФІГУРАЦІЯ ---
-FILE = "../lidar_files/1.las"
-OUTPUT = "../output/geojson/buildings.geojson"
-TILE_SIZE = 50  # м
-MIN_BUILDING_AREA = 10  # м^2
-WORKERS = max(1, cpu_count() - 2)
+# === DEBUG: crash on OOM with traceback ===
+faulthandler.enable()
+MEM_LIMIT = 0  # no extra limit here
+# =====================
 
+# === CONFIG ===
+TILE_DIR           = "tiles/1"
+OUTPUT_FILE        = "output/geojson/buildings.geojson"
+MIN_BUILDING_AREA  = 20      # m²
+HEIGHT_THRESHOLD   = 2.0     # meters above ground
+WORKERS            = max(1, cpu_count() - 2)
+# ===============
 
 def main():
-    print(f"Старт: {FILE}")
+    os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
+    # Collect tile files
+    tiles = sorted(glob.glob(os.path.join(TILE_DIR, "*.las")))
+    print(f"Found {len(tiles)} tile files in '{TILE_DIR}'.")
 
-    minx, miny, maxx, maxy = get_las_bounds(FILE)
-    print(f"Межі: X ({minx:.2f}, {maxx:.2f}), Y ({miny:.2f}, {maxy:.2f})")
+    with open(OUTPUT_FILE, "w") as out:
+        out.write('{"type":"FeatureCollection","features":[')
+        first = True
 
-    tiles = split_area_into_tiles(minx, miny, maxx, maxy, TILE_SIZE)
-    print(f"Тайлів: {len(tiles)}")
+        with Pool(WORKERS, maxtasksperchild=1) as pool:
+            for feats in tqdm(
+                pool.imap_unordered(process_tile_file, tiles),
+                total=len(tiles),
+                desc="Processing tiles"
+            ):
+                for feat in feats:
+                    if not first: out.write(",")
+                    out.write(json.dumps(feat))
+                    first = False
+                gc.collect()
 
-    worker_func = partial(process_tile_worker, filepath=FILE, min_building_area=MIN_BUILDING_AREA)
-    features = []
+        out.write("]}")
 
-    print(f"Паралельна обробка на {WORKERS} ядрах...")
-    with Pool(WORKERS) as pool:
-        results = list(tqdm(pool.imap_unordered(worker_func, tiles), total=len(tiles)))
-
-    for tile_features in results:
-        if tile_features:
-            features.extend(tile_features)
-
-    if not features:
-        print("Нічого не знайдено — перевірте параметри.")
-        return
-
-    feature_collection = geojson.FeatureCollection(features)
-    os.makedirs(os.path.dirname(OUTPUT), exist_ok=True)
-    with open(OUTPUT, "w") as f:
-        geojson.dump(feature_collection, f, indent=2)
-
-    print(f"OK! Знайдено {len(features)} будівель. Результат: {OUTPUT}")
-
+    print(f"✅ Done: {OUTPUT_FILE}")
 
 if __name__ == "__main__":
     main()

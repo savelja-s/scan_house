@@ -1,78 +1,71 @@
-import pdal
 import json
+import pdal
 import numpy as np
-from shapely.geometry import Polygon, mapping
+import gc
 import pcl
+from shapely.geometry import Polygon, mapping
 
 
-def process_tile_worker(tile_bounds, filepath, min_building_area):
+def process_tile(tile_bounds, filepath, min_building_area, height_threshold=2.0):
+    """
+    Process a single tile: read with bounds, classify ground, compute HAG via plugin,
+    filter by height, and extract building clusters.
+    """
     minx, miny, maxx, maxy = tile_bounds
 
-    # --- PDAL: класифікація, фільтрація ---
-    pipeline_json = [
+    # PDAL pipeline using bounds directly in reader to limit memory use
+    pipeline_steps = [
         {"type": "readers.las", "filename": filepath},
         {"type": "filters.crop", "bounds": f"([{minx},{maxx}],[{miny},{maxy}])"},
-        {"type": "filters.smrf", "returns": "last,first"},
-        {"type": "filters.range", "limits": "Classification![2:2]"}
+        {"type": "filters.smrf"},          # ground classification
+        {"type": "filters.hag_nn"},       # height above ground (nearest-neighbor)
+        # filters.hag_delaunay         Computes height above ground using delaunay interpolation of ground returns.
+        # filters.hag_dem              Computes height above ground using a DEM raster.
+        # filters.hag_nn               Computes height above ground using nearest-neighbor ground-classified returns.
+        {"type": "filters.range", "limits": f"HAG[{height_threshold}:]"}  # keep high points
     ]
 
     try:
-        pipeline = pdal.Pipeline(json.dumps(pipeline_json))
-        if pipeline.execute() < 100:
-            return None
-        non_ground_points = pipeline.arrays[0]
-    except RuntimeError as e:
-        print(f"PDAL error {tile_bounds}: {e}")
-        return None
+        pipeline = pdal.Pipeline(json.dumps(pipeline_steps))
+        count = pipeline.execute()
+        if count == 0:
+            return []
+        arr = pipeline.arrays[0]
+        pts = np.vstack((arr['X'], arr['Y'], arr['Z'])).T.astype(np.float32)
+    except Exception as e:
+        print(f"[WARNING] PDAL error on tile {tile_bounds}: {e}")
+        return []
 
-    cloud_points = np.vstack([non_ground_points['X'], non_ground_points['Y'], non_ground_points['Z']]).transpose()
-    if cloud_points.shape[0] < 50:
-        return None
+    if pts.shape[0] < 100:
+        return []
 
-    cloud = pcl.PointCloud(cloud_points.astype(np.float32))
-
-    # --- PCL: сегментація площин ---
-    seg = cloud.make_segmenter_normals(ksearch=50)
-    seg.set_optimize_coefficients(True)
-    seg.set_model_type(pcl.SACMODEL_NORMAL_PLANE)
-    seg.set_method_type(pcl.SAC_RANSAC)
-    seg.set_distance_threshold(0.5)
-    indices, _ = seg.segment()
-    if len(indices) < 50:
-        return None
-
-    building_cloud = cloud.extract(indices, negative=False)
-
-    # --- PCL: кластеризація ---
-    tree = building_cloud.make_kdtree()
-    ec = building_cloud.make_EuclideanClusterExtraction()
-    ec.set_ClusterTolerance(2.5)
-    ec.set_MinClusterSize(50)
-    ec.set_MaxClusterSize(25000)
+    # Euclidean clustering with PCL
+    cloud = pcl.PointCloud(pts)
+    tree = cloud.make_kdtree()
+    ec = cloud.make_EuclideanClusterExtraction()
+    ec.set_ClusterTolerance(1.5)
+    ec.set_MinClusterSize(100)
+    ec.set_MaxClusterSize(50000)
     ec.set_SearchMethod(tree)
-    cluster_indices = ec.extract()
-    if not cluster_indices:
-        return None
+    # Correct clustering call for python-pcl
+    cluster_indices = ec.Extract()
 
     features = []
-    for indices in cluster_indices:
-        points = [building_cloud[indice][:3] for indice in indices]
-        points_2d = np.array(points)[:, :2]
-        try:
-            hull = Polygon(points_2d).convex_hull
-        except Exception:
-            continue
-
+    for pi in cluster_indices:
+        idxs = pi.indices
+        coords = pts[idxs]
+        hull = Polygon(coords[:, :2]).convex_hull
         if not hull.is_valid or hull.area < min_building_area:
             continue
-
-        feature = {
+        features.append({
             "type": "Feature",
             "properties": {
                 "area_m2": round(hull.area, 2),
-                "points_count": len(points)
+                "points_count": int(len(idxs))
             },
             "geometry": mapping(hull)
-        }
-        features.append(feature)
-    return features if features else None
+        })
+
+    del pts, arr, pipeline, cloud, tree, ec, cluster_indices
+    gc.collect()
+    return features 

@@ -1,46 +1,41 @@
-from typing import List, Tuple
-
+import json
+import pdal
 
 def get_las_bounds(filepath: str):
     """
-    Отримує мінімальні та максимальні X, Y координати з метаданих LAS-файлу.
-    Працює із різними форматами метаданих PDAL.
+    Returns the bounding box of the LAS/LAZ file.
     """
-    import json
-    import pdal
-
-    pipeline_json = json.dumps([{"type": "readers.las", "filename": filepath}])
+    pipeline_json = json.dumps([
+        {"type": "readers.las", "filename": filepath}
+    ])
     pipeline = pdal.Pipeline(pipeline_json)
     pipeline.execute()
-    metadata = pipeline.metadata
+    meta = pipeline.metadata['metadata']['readers.las']
 
-    las_meta = metadata['metadata']['readers.las']
-
-    # Перевірка наявності bbox (на майбутнє)
-    if 'bbox' in las_meta and 'native' in las_meta['bbox']:
-        bounds = las_meta['bbox']['native']['bbox']
+    # If spatial index exists
+    if 'bbox' in meta.get('bbox', {}):
+        bounds = meta['bbox']['native']['bbox']
         return bounds['minx'], bounds['miny'], bounds['maxx'], bounds['maxy']
 
-    # Якщо bbox немає, беремо напряму
-    return (
-        las_meta['minx'],
-        las_meta['miny'],
-        las_meta['maxx'],
-        las_meta['maxy']
-    )
+    # Fallback to direct min/max
+    return meta['minx'], meta['miny'], meta['maxx'], meta['maxy']
 
 
-def split_area_into_tiles(minx, miny, maxx, maxy, tile_size: int) -> List[Tuple[float, float, float, float]]:
+def split_area_into_tiles(minx, miny, maxx, maxy, tile_size: float):
     """
-    Розбиває загальну прямокутну область на менші квадрати (тайли).
+    Splits the overall bounding box into square tiles of given size.
     """
     tiles = []
     x = minx
     while x < maxx:
         y = miny
         while y < maxy:
-            # Координати одного тайла
-            tiles.append((x, y, x + tile_size, y + tile_size))
+            tiles.append((
+                x,
+                y,
+                min(x + tile_size, maxx),
+                min(y + tile_size, maxy)
+            ))
             y += tile_size
         x += tile_size
     return tiles
