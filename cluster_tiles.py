@@ -8,8 +8,10 @@ import signal
 import ctypes
 import sys
 
-
 # --- 1) Ініціалізатор воркера: ігнор SIGINT + death‑sig на випадок, якщо батько помре
+import psutil
+
+
 def init_worker():
     # ігноруємо Ctrl+C у воркерах
     signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -44,6 +46,7 @@ def cluster_tile(in_file: str, out_dir: str, min_points: int, tolerance: float) 
 
 
 def main() -> None:
+    pid = os.getpid()
     parser = argparse.ArgumentParser(
         description="Кластеризація точок Class=6 у кожному тайлі"
     )
@@ -59,9 +62,12 @@ def main() -> None:
 
     def shutdown(signum, frame):
         print("STOP ALL PROCESSES", file=sys.stderr)
-        if executor:
-            executor.shutdown(cancel_futures=True)
-        sys.exit(1)
+        parent = psutil.Process(pid)
+        for child in parent.children(recursive=True):
+            print("child", child)
+            child.kill()
+
+        parent.kill()
 
     for sig in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, shutdown)
@@ -73,12 +79,13 @@ def main() -> None:
 
     labeled_files = sorted(glob.glob(os.path.join(labeled_dir, "*_labeled.laz")))
 
+    print(f'Start worker for CLUSTER with PID {pid}')
+
     if not labeled_files:
         print(f"Не знайдено файлів *_labeled.laz у {labeled_dir}")
         return
     try:
         with ProcessPoolExecutor(max_workers=args.workers) as pool:
-            executor = pool
             for in_file in labeled_files:
                 pool.submit(cluster_tile, in_file, out_dir, args.min_points, args.tolerance)
     except Exception as e:
