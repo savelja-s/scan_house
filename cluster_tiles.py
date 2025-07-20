@@ -89,10 +89,6 @@ def main() -> None:
 
     executor_ref = [None]  # щоб замикання бачили executor у shutdown
 
-    with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        for in_file in labeled_files:
-            executor.submit(cluster_tile, in_file, out_dir, args.min_points, args.tolerance)
-
     try:
         with ProcessPoolExecutor(max_workers=args.workers, initializer=init_worker) as pool:
             executor_ref[0] = pool
