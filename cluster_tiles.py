@@ -6,6 +6,7 @@ import json
 import pdal
 import signal
 import ctypes
+import sys
 
 
 # --- 1) Ініціалізатор воркера: ігнор SIGINT + death‑sig на випадок, якщо батько помре
@@ -54,6 +55,17 @@ def main() -> None:
     parser.add_argument("--tolerance", type=float, default=2.0, help="Допуск DBSCAN (м) для кластеризації")
 
     args = parser.parse_args()
+    executor = None
+
+    def shutdown(signum, frame):
+        print("STOP ALL PROCESSES", file=sys.stderr)
+        if executor:
+            executor.shutdown(cancel_futures=True)
+        sys.exit(1)
+
+    for sig in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
+        signal.signal(sig, shutdown)
+
     labeled_dir = args.classification_dir
     project_dir = os.path.dirname(os.path.dirname(labeled_dir))
     out_dir = os.path.join(project_dir, "clusters")
@@ -65,12 +77,13 @@ def main() -> None:
         print(f"Не знайдено файлів *_labeled.laz у {labeled_dir}")
         return
     try:
-        with ProcessPoolExecutor(max_workers=args.workers) as executor:
+        with ProcessPoolExecutor(max_workers=args.workers) as pool:
+            executor = pool
             for in_file in labeled_files:
-                executor.submit(cluster_tile, in_file, out_dir, args.min_points, args.tolerance)
+                pool.submit(cluster_tile, in_file, out_dir, args.min_points, args.tolerance)
     except Exception as e:
         print(f'SOME error {e}')
-        executor.shutdown(cancel_futures=True)
+
     print(f"Кластеризація завершена. Результати в {out_dir}")
 
 
