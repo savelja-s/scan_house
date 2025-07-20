@@ -5,20 +5,8 @@ from concurrent.futures import ProcessPoolExecutor
 import json
 import pdal
 import signal
-import ctypes
 import sys
-
-# --- 1) Ініціалізатор воркера: ігнор SIGINT + death‑sig на випадок, якщо батько помре
 import psutil
-
-
-def init_worker():
-    # ігноруємо Ctrl+C у воркерах
-    signal.signal(signal.SIGINT, signal.SIG_IGN)
-    # встановлюємо сигнал смерті воркера, коли помирає батько
-    libc = ctypes.CDLL("libc.so.6")
-    PR_SET_PDEATHSIG = 1
-    libc.prctl(PR_SET_PDEATHSIG, signal.SIGTERM)
 
 
 def cluster_tile(in_file: str, out_dir: str, min_points: int, tolerance: float) -> None:
