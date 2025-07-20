@@ -58,7 +58,6 @@ def main() -> None:
     parser.add_argument("--tolerance", type=float, default=2.0, help="Допуск DBSCAN (м) для кластеризації")
 
     args = parser.parse_args()
-    executor = None
 
     def shutdown(signum, frame):
         print("STOP ALL PROCESSES", file=sys.stderr)
@@ -68,6 +67,7 @@ def main() -> None:
             child.kill()
 
         parent.kill()
+        sys.exit(1)
 
     for sig in (signal.SIGHUP, signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, shutdown)
@@ -83,7 +83,7 @@ def main() -> None:
 
     if not labeled_files:
         print(f"Не знайдено файлів *_labeled.laz у {labeled_dir}")
-        return
+        sys.exit(1)
     try:
         with ProcessPoolExecutor(max_workers=args.workers) as pool:
             for in_file in labeled_files:
