@@ -39,10 +39,9 @@ project_root/
 1. **Розбиття файлу на тайли**
 
    ```bash
-   python split_las_tiles.py lidar_files/1.las \
+   bash split_las_tiles.sh lidar_files/1.las \
      --tile-size 100 \
-     --overlap 10 \
-     --workers 8
+     --overlap 10 
    ```
 
    * [x] Перевірити тайли у `outputs/1/`
