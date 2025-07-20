@@ -64,11 +64,13 @@ def main() -> None:
     if not labeled_files:
         print(f"Не знайдено файлів *_labeled.laz у {labeled_dir}")
         return
-
-    with ProcessPoolExecutor(max_workers=args.workers) as executor:
-        for in_file in labeled_files:
-            executor.submit(cluster_tile, in_file, out_dir, args.min_points, args.tolerance)
-
+    try:
+        with ProcessPoolExecutor(max_workers=args.workers) as executor:
+            for in_file in labeled_files:
+                executor.submit(cluster_tile, in_file, out_dir, args.min_points, args.tolerance)
+    except Exception as e:
+        print(f'SOME error {e}')
+        executor.shutdown(cancel_futures=True)
     print(f"Кластеризація завершена. Результати в {out_dir}")
 
 
