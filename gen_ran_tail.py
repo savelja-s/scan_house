@@ -14,7 +14,7 @@ def main():
         {"type": "readers.las", "filename": file_las_path},
         {"type": "filters.smrf", "scalar": 1.25, "slope": 0.15, "threshold": 0.5, "window": 16.0},
         {"type": "filters.hag_nn"},
-        {"type": "filters.decimation", "step": 200}  # приблизно 1/200 ≈ 0.5%
+        {"type": "filters.decimation", "step": 1}  # приблизно 1/200 ≈ 0.5%
     ]))
     pipeline.execute()
     arr = pipeline.arrays[0]
@@ -26,12 +26,9 @@ def main():
         'Y': arr['Y'],
         'Z': arr['Z'],
         'HAG': arr['HeightAboveGround'],
-        'Intensity': arr['Intensity'],
-        'Label': '',
-        'Classification': arr['Classification'],
-        'PointSourceId': arr['PointSourceId']
+        'Intensity': arr['Intensity']
     })
-    df.to_csv('ml_files/features_1_tail_0_3_c.csv', index=False)
+    df.to_csv('ml_files/features_1_tail_0_3_1p.csv', index=False)
     print(f"Збережено features.csv з {len(df)} точок.")
 
 
