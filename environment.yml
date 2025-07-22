@@ -1,4 +1,4 @@
-name: lidar_project
+name: lidar_scanner
 channels:
   - sirokujira
   - jithinpr2
@@ -8,12 +8,12 @@ dependencies:
   - python=3.10
   - pdal
   - python-pdal
-  - python-pcl
+#  - python-pcl
   - gtk3
   - shapely
   - tqdm
   - ipython
-  - jupyter
+  - jupyterlab
   - plotly
   - geopandas
   - laspy
