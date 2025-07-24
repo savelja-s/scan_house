@@ -1,0 +1,16 @@
+[
+  {
+    "type": "readers.las",
+    "filename": "lidar_files/1.las"
+  },
+  {
+    "type": "filters.smrf",
+    "scalar": 1.25,
+    "slope": 0.15,
+    "threshold": 0.5,
+    "window": 16.0
+  },
+  {
+    "type": "filters.hag_nn"
+  }
+]

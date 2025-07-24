@@ -12,7 +12,9 @@ conda update -n base -c defaults conda -y &&
   conda install conda-forge::plotly -y &&
   conda install conda-forge::laspy -y &&
   conda install conda-forge::geopandas -y &&
-  conda install -c conda-forge jupyterlab
+  conda install -c conda-forge jupyterlab -y &&
+  conda install conda-forge::entwine -y &&
+  conda install -c conda-forge open3d -y
 
 # conda env export --no-builds > environment.yml
 # conda env create -f environment.yml

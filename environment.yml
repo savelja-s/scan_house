@@ -17,3 +17,5 @@ dependencies:
   - plotly
   - geopandas
   - laspy
+  - entwine
+  - open3d
