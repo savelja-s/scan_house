@@ -1,0 +1,27 @@
+[
+  {
+    "type": "readers.las",
+    "filename": "data/1/02_class_ground.las",
+    "use_eb_vlr": true
+  },
+  {
+    "type": "filters.hag_nn"
+  },
+  {
+    "type": "filters.sort",
+    "dimension": "HeightAboveGround",
+    "order": "DESC"
+  },
+  {
+    "type": "filters.litree",
+    "min_points": 10,
+    "min_height": 3.0,
+    "radius": 25.0
+  },
+  {
+    "type": "writers.las",
+    "filename": "data/1/classified_ground_litree.las",
+    "minor_version": 1.4,
+    "extra_dims": "all"
+  }
+]

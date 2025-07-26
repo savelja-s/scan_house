@@ -21,3 +21,6 @@ conda update -n base -c defaults conda -y &&
 # conda activate lidar_project
 # conda env update --file environment.yml --prune
 #jupyter lab --ip=0.0.0.0 --port=8888 --no-browser
+
+
+conda install conda-forge::r-lidr
