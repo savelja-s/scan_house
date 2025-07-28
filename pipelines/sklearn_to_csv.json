@@ -1,0 +1,38 @@
+[
+  "lidar_files/1.las",
+  {
+    "type": "filters.assign",
+    "assignment": "Classification[:]=0"
+  },
+  {
+    "type": "filters.decimation",
+    "step": 5
+  },
+  {
+    "type": "filters.smrf",
+    "ignore": "Classification[7:7]",
+    "scalar": 1.25,
+    "slope": 0.15,
+    "threshold": 0.5,
+    "window": 5.0
+  },
+  {
+    "type": "filters.hag_nn",
+    "count": 8
+  },
+  {
+    "type": "filters.normal",
+    "knn": 16
+  },
+  {
+    "type": "filters.radialdensity",
+    "radius": 1.0
+  },
+  {
+    "type": "writers.text",
+    "filename": "test_sklearn/1x5_all.csv",
+    "format": "csv",
+    "keep_unspecified": true,
+    "delimiter": ","
+  }
+]

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module version="4">
   <component name="NewModuleRootManager">
-    <orderEntry type="jdk" jdkName="Python 3.10 (lidar_scanner)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.10 (lidar_project)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

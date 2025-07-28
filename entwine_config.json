@@ -1,9 +1,9 @@
 {
   "input": "lidar_files/1.las",
-  "output": "1_new_ept",
-  "span": 1,
-  "maxNodeSize": 5000,
-  "cacheSize": 1000,
+  "output": "1_ept",
+  "span": 100,
+  "maxNodeSize": 100000,
+  "cacheSize": 5000,
   "hierarchyStep": 1,
-  "threads": 4
+  "threads": 8
 }

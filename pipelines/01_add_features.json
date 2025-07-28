@@ -1,0 +1,29 @@
+[
+    {
+        "type": "readers.ept",
+        "filename": "1_ept/ept.json",
+        "resolution": 0.0
+    },
+    {
+        "type": "filters.smrf",
+        "ignore": "Classification[7:7]"
+    },
+    {
+        "type": "filters.hag_nn",
+        "count": 8
+    },
+    {
+        "type": "filters.normal",
+        "knn": 16
+    },
+    {
+        "type": "filters.radialdensity",
+        "radius": 1.0
+    },
+    {
+        "type": "writers.las",
+        "filename": "test_index/augmented_0_0.las",
+        "minor_version": 4,
+        "extra_dims": "all"
+    }
+]

@@ -16,6 +16,9 @@ conda update -n base -c defaults conda -y &&
   conda install conda-forge::entwine -y &&
   conda install -c conda-forge open3d -y
 
+#conda install -c conda-forge/label/gcc7 qhull
+#conda install -c conda-forge -c davidcaron pclpy
+
 # conda env export --no-builds > environment.yml
 # conda env create -f environment.yml
 # conda activate lidar_project

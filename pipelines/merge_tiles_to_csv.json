@@ -1,0 +1,26 @@
+[
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_10.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_18.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_19.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_20.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_21.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_24.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_38.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_40.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_41.las" },
+  { "type": "readers.las", "filename": "test_sklearn/training_data/tiles/tile_42.las" },
+
+  { "type": "filters.merge" },
+  { "type": "filters.sample", "radius": 0.05 },
+  { "type": "filters.hag_nn", "count": 12 },
+  { "type": "filters.normal", "knn": 24 },
+  { "type": "filters.radialdensity", "radius": 1.5 },
+
+  {
+    "type": "writers.text",
+    "filename": "test_sklearn/training_data/training_sample_0.05.csv",
+    "format": "csv",
+    "keep_unspecified": true,
+    "delimiter": ","
+  }
+]

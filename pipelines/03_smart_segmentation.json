@@ -1,0 +1,49 @@
+[
+    {
+        "type": "readers.ept",
+        "filename": "1_ept/ept.json",
+        "resolution": 0.5
+    },
+    {
+        "type": "filters.smrf",
+        "ignore": "Classification[7:7]",
+        "slope": 0.15,
+        "window": 16.0,
+        "threshold": 0.5,
+        "scalar": 1.25
+    },
+    {
+        "type": "filters.hag_nn",
+        "count": 8
+    },
+    {
+        "type": "filters.range",
+        "limits": "HeightAboveGround[2:50]"
+    },
+    {
+        "type": "filters.normal",
+        "knn": 16
+    },
+    {
+        "type": "filters.radialdensity",
+        "radius": 1.0
+    },
+    {
+        "type": "filters.approximatecoplanar",
+        "knn": 16,
+        "thresh1": 25.0,
+        "thresh2": 6.0
+    },
+    {
+        "type": "filters.cluster",
+        "tolerance": 1.5,
+        "min_points": 50,
+        "is3d": true
+    },
+    {
+        "type": "writers.las",
+        "filename": "test_index/smart_clustered_ept.las",
+        "minor_version": 4,
+        "extra_dims": "all"
+    }
+]

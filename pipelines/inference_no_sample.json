@@ -1,0 +1,24 @@
+[
+  "lidar_files/1.las",
+  {
+    "type": "filters.assign",
+    "assignment": "Classification[:]=0"
+  },
+  {
+    "type": "filters.smrf",
+    "ignore": "Classification[7:7]",
+    "scalar": 1.5,
+    "slope": 0.3,
+    "threshold": 0.3,
+    "window": 4.0
+  },
+  { "type": "filters.hag_nn", "count": 12 },
+  { "type": "filters.normal", "knn": 24 },
+  { "type": "filters.radialdensity", "radius": 1.5 },
+  {
+    "type": "writers.las",
+    "filename": "test_sklearn/training_data/full_with_feats_no_sample.las",
+    "minor_version": 4,
+    "extra_dims": "all"
+  }
+]

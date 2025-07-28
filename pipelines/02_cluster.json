@@ -1,0 +1,18 @@
+[
+  {
+    "type": "readers.las",
+    "filename": "test_index/augmented.las"
+  },
+  {
+    "type": "filters.cluster",
+    "tolerance": 0.5,
+    "min_points": 20,
+    "is3d": true
+  },
+  {
+    "type": "writers.las",
+    "filename": "test_index/clustered_v2.las",
+    "minor_version": 4,
+    "extra_dims": "all"
+  }
+]

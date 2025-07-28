@@ -1,0 +1,14 @@
+[
+  {
+    "type": "readers.las",
+    "filename": "test_sklearn/training_data/tiles/tile_11.las"
+  },
+  {
+    "type": "filters.range",
+    "limits": "Classification[2:2]"
+  },
+  {
+    "type": "writers.las",
+    "filename": "test_sklearn/training_data/tile_11_ground.las"
+  }
+]
