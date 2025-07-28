@@ -213,3 +213,5 @@ data/*
 logs/*
 results/*
 octree_1/*
+models_rf/*
+test_sklearn/*
